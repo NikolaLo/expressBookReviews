@@ -37,21 +37,23 @@ public_users.post("/register", (req,res) => {
     return res.status(404).json({message: "Unable to register user."});
 });
 
-// Get the book list available in the shop
-public_users.get('/',function (req, res) {
-let output_books= new Promise((resolve,reject)=>{
-        if(books){
-            resolve(books);
-        }else {
-            reject("Object Books doesn't exist!");
+const getBooksAsync = async () => {
+    return new Promise((resolve, reject) => {
+        if (books) {
+            resolve(Object.values(books));
+        } else {
+            reject(new Error('Failed to fetch books'));
         }
     });
-    // Execute the promise
-    output_books.then((books) => {
-        res.send(books);
-    }).catch((error) => {
-        res.send(error);
-    });
+};
+// Get the book list available in the shop
+public_users.get('/', async function (req, res) {
+    try {
+        const all_Books = await getBooksAsync();
+        res.json(all_Books);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch books' });
+    }
 });
 
 // Get book details based on ISBN
